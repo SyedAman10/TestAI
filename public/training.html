@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Training - Ketamine Therapy Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .nav-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
+            background: #764ba2;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .file-upload {
+            border: 3px dashed #667eea;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            background: #f8f9fa;
+            border-color: #764ba2;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: #28a745;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        .training-examples-list {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .training-example {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .training-example h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .training-example .label {
+            font-weight: bold;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .training-example .content {
+            color: #333;
+            margin-top: 5px;
+            white-space: pre-wrap;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-box .label {
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .training-status {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🧠 Model Training Center</h1>
+            <p>Fine-tune the AI with your therapeutic data</p>
+            <div class="nav-buttons">
+                <a href="index.html" class="nav-button">💬 Chat Interface</a>
+                <a href="training.html" class="nav-button active">🧠 Training</a>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h3>📚 What is Model Training?</h3>
+            <p><strong>RAG (Current)</strong>: Your uploaded documents are retrieved and used as context - no training
+                needed!</p>
+            <p><strong>Fine-Tuning (This Page)</strong>: Create training examples to permanently customize the model's
+                behavior, style, and understanding.</p>
+            <p><strong>Best Approach</strong>: Use BOTH! RAG for up-to-date knowledge, fine-tuning for consistent
+                therapeutic style.</p>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="warning-box">
+            <h3>⚠️ Important Notes</h3>
+            <ul>
+                <li>Fine-tuning requires external compute resources (Google Colab, Hugging Face AutoTrain, etc.)</li>
+                <li>You'll need at least 100-1000 high-quality training examples</li>
+                <li>This interface helps you prepare training data - actual training happens externally</li>
+                <li>See the guides: FINE-TUNING-GUIDE.md and TRAINING-GUIDE.md</li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <!-- Add Training Example Section -->
+            <div class="section">
+                <h2 class="section-title">➕ Add Training Example</h2>
+
+                <div class="form-group">
+                    <label>User Question/Input:</label>
+                    <textarea id="exampleInstruction" placeholder="Enter the user's question or input..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Context (Optional):</label>
+                    <input type="text" id="exampleContext"
+                        placeholder="e.g., Pre-session preparation, Safety guidelines">
+                </div>
+
+                <div class="form-group">
+                    <label>Expected AI Response:</label>
+                    <textarea id="exampleResponse" placeholder="Enter the ideal therapeutic response..."></textarea>
+                </div>
+
+                <button onclick="addTrainingExample()">➕ Add Example</button>
+                <button class="secondary" onclick="clearForm()">🔄 Clear Form</button>
+            </div>
+
+            <!-- Upload Training Data Section -->
+            <div class="section">
+                <h2 class="section-title">📤 Upload Training Data</h2>
+
+                <div class="file-upload" onclick="document.getElementById('trainingFileInput').click()">
+                    <p>📄 <strong>Upload Training Data File</strong></p>
+                    <p style="color: #666; font-size: 0.9em;">
+                        Supports JSON, JSONL, CSV, TXT, MD, PDF formats
+                    </p>
+                    <input type="file" id="trainingFileInput" accept=".json,.jsonl,.csv,.txt,.md,.pdf"
+                        onchange="uploadTrainingFile()">
+                </div>
+
+                <div class="form-group">
+                    <label>Format:</label>
+                    <select id="formatSelect">
+                        <option value="jsonl">JSONL (OpenAI/Hugging Face)</option>
+                        <option value="alpaca">Alpaca (LLaMA)</option>
+                        <option value="chat">Chat Format</option>
+                    </select>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="loadExamples()">🔄 Refresh Examples</button>
+                    <button class="secondary" onclick="downloadTrainingData()">💾 Download Training Data</button>
+                    <button class="danger" onclick="clearAllExamples()">🗑️ Clear All</button>
+                </div>
+            </div>
+
+            <!-- Training Examples List -->
+            <div class="section full-width">
+                <h2 class="section-title">📋 Training Examples (<span id="exampleCount">0</span>)</h2>
+
+                <div class="training-examples-list" id="examplesList">
+                    <p style="text-align: center; color: #666;">No training examples yet. Add some above!</p>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="section">
+                <h2 class="section-title">📊 Training Data Statistics</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="number" id="statExamples">0</div>
+                        <div class="label">Examples</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="statAvgLength">0</div>
+                        <div class="label">Avg Response Length</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="statReadiness">0%</div>
+                        <div class="label">Training Ready</div>
+                    </div>
+                </div>
+
+                <div class="training-status">
+                    <h3>📈 Readiness Assessment</h3>
+                    <div class="status-item">
+                        <span>Minimum Examples (100):</span>
+                        <span id="statusMinExamples">❌</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Recommended Examples (500):</span>
+                        <span id="statusRecExamples">❌</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Data Quality:</span>
+                        <span id="statusQuality">⚠️ Not assessed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Local Training Section -->
+            <div class="section">
+                <h2 class="section-title">🖥️ Local Training</h2>
+
+                <div class="info-box" style="background: #e8f5e9; border-color: #4caf50;">
+                    <h3 style="color: #2e7d32;">🚀 Train on your machine</h3>
+                    <p>You can train the model locally if you have Python installed. If not, this will run a simulation
+                        to demonstrate the process.</p>
+                </div>
+
+                <div class="training-status" id="trainingConsole"
+                    style="background: #1e1e1e; color: #00ff00; font-family: monospace; padding: 15px; border-radius: 5px; height: 200px; overflow-y: auto; display: none;">
+                    <div>> Ready to start training...</div>
+                </div>
+
+                <button onclick="startLocalTraining()" style="width: 100%; margin: 10px 0; font-size: 1.2em;">🚀 Start
+                    Local Training</button>
+            </div>
+
+            <!-- Training Guide -->
+            <div class="section">
+                <h2 class="section-title">🚀 Next Steps</h2>
+
+                <h3 style="margin-top: 20px;">1. Prepare Training Data</h3>
+                <p>Add at least 100 high-quality examples above, or upload existing training data.</p>
+
+                <h3 style="margin-top: 20px;">2. Download Training Files</h3>
+                <p>Click "Download Training Data" to get your prepared dataset in multiple formats.</p>
+
+                <h3 style="margin-top: 20px;">3. Choose Training Method</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Hugging Face AutoTrain</strong>: Easiest, recommended for beginners</li>
+                    <li><strong>Google Colab</strong>: Free GPU, more control</li>
+                    <li><strong>Local Training</strong>: Full control, requires GPU</li>
+                </ul>
+
+                <h3 style="margin-top: 20px;">4. Fine-Tune Your Model</h3>
+                <p>Follow the complete guide in <strong>FINE-TUNING-GUIDE.md</strong></p>
+
+                <div class="action-buttons">
+                    <button onclick="window.open('https://huggingface.co/autotrain', '_blank')">
+                        🤗 Open Hugging Face AutoTrain
+                    </button>
+                    <button onclick="window.open('https://colab.research.google.com/', '_blank')">
+                        📓 Open Google Colab
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let trainingExamples = [];
+
+        // Load examples on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Training Center Loaded');
+            loadExamples();
+        });
+
+        async function addTrainingExample() {
+            const instruction = document.getElementById('exampleInstruction').value.trim();
+            const context = document.getElementById('exampleContext').value.trim();
+            const response = document.getElementById('exampleResponse').value.trim();
+
+            if (!instruction || !response) {
+                alert('Please fill in at least the instruction and response fields!');
+                return;
+            }
+
+            console.log('➕ Adding training example...');
+
+            try {
+                const res = await fetch(API_URL + '/api/training/add-example', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ instruction, context, response })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    console.log('✅ Example added successfully');
+                    alert('✅ Training example added!');
+                    clearForm();
+                    loadExamples();
+                } else {
+                    console.error('❌ Failed to add example:', data.error);
+                    alert('❌ Failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function loadExamples() {
+            console.log('📚 Loading training examples...');
+
+            try {
+                const res = await fetch(API_URL + '/api/training/examples');
+                const data = await res.json();
+
+                if (data.success) {
+                    trainingExamples = data.examples;
+                    displayExamples();
+                    updateStats();
+                    console.log('✅ Loaded', trainingExamples.length, 'examples');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load examples:', error);
+            }
+        }
+
+        function displayExamples() {
+            const listEl = document.getElementById('examplesList');
+
+            if (trainingExamples.length === 0) {
+                listEl.innerHTML = '<p style="text-align: center; color: #666;">No training examples yet. Add some above!</p>';
+                return;
+            }
+
+            listEl.innerHTML = trainingExamples.map((ex, idx) => `
+                <div class="training-example">
+                    <h4>Example ${idx + 1}</h4>
+                    <div class="label">👤 User Input:</div>
+                    <div class="content">${ex.instruction}</div>
+                    ${ex.context ? `
+                        <div class="label">📋 Context:</div>
+                        <div class="content">${ex.context}</div>
+                    ` : ''}
+                    <div class="label">🤖 AI Response:</div>
+                    <div class="content">${ex.response}</div>
+                    <button class="danger" onclick="deleteExample(${idx})" style="margin-top: 10px;">🗑️ Delete</button>
+                </div>
+            `).join('');
+
+            document.getElementById('exampleCount').textContent = trainingExamples.length;
+        }
+
+        function updateStats() {
+            const count = trainingExamples.length;
+            const avgLength = count > 0
+                ? Math.round(trainingExamples.reduce((sum, ex) => sum + ex.response.length, 0) / count)
+                : 0;
+            const readiness = Math.min(100, Math.round((count / 500) * 100));
+
+            document.getElementById('statExamples').textContent = count;
+            document.getElementById('statAvgLength').textContent = avgLength;
+            document.getElementById('statReadiness').textContent = readiness + '%';
+
+            // Update readiness status
+            document.getElementById('statusMinExamples').textContent = count >= 100 ? '✅' : '❌';
+            document.getElementById('statusRecExamples').textContent = count >= 500 ? '✅' : '❌';
+            document.getElementById('statusQuality').textContent =
+                avgLength > 100 && avgLength < 2000 ? '✅ Good' : '⚠️ Check response lengths';
+        }
+
+        async function deleteExample(index) {
+            if (!confirm('Delete this training example?')) return;
+
+            try {
+                const res = await fetch(API_URL + `/api/training/examples/${index}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    loadExamples();
+                }
+            } catch (error) {
+                console.error('❌ Failed to delete:', error);
+            }
+        }
+
+        async function clearAllExamples() {
+            if (!confirm('⚠️ Delete ALL training examples? This cannot be undone!')) return;
+
+            try {
+                const res = await fetch(API_URL + '/api/training/clear', {
+                    method: 'POST'
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('✅ All examples cleared');
+                    loadExamples();
+                }
+            } catch (error) {
+                console.error('❌ Failed to clear:', error);
+            }
+        }
+
+        async function downloadTrainingData() {
+            const format = document.getElementById('formatSelect').value;
+
+            console.log('💾 Downloading training data in', format, 'format...');
+
+            try {
+                const res = await fetch(API_URL + `/api/training/download/${format}`);
+                const blob = await res.blob();
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `training-data.${format === 'jsonl' ? 'jsonl' : 'json'}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                console.log('✅ Download started');
+            } catch (error) {
+                console.error('❌ Download failed:', error);
+                alert('❌ Download failed: ' + error.message);
+            }
+        }
+
+        async function uploadTrainingFile() {
+            const fileInput = document.getElementById('trainingFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            console.log('📤 Uploading training file:', file.name);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch(API_URL + '/api/training/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    console.log('✅ Uploaded', data.examples_added, 'examples');
+                    alert(`✅ Successfully added ${data.examples_added} training examples!`);
+                    loadExamples();
+                } else {
+                    alert('❌ Upload failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('❌ Upload error:', error);
+                alert('❌ Upload failed: ' + error.message);
+            }
+
+            fileInput.value = '';
+        }
+
+        function clearForm() {
+            document.getElementById('exampleInstruction').value = '';
+            document.getElementById('exampleContext').value = '';
+            document.getElementById('exampleResponse').value = '';
+        }
+
+        async function startLocalTraining() {
+            if (!confirm('Start local training? This may take a while.')) return;
+
+            const consoleEl = document.getElementById('trainingConsole');
+            consoleEl.style.display = 'block';
+            consoleEl.innerHTML += '<div>> Initializing training process...</div>';
+
+            try {
+                const res = await fetch(API_URL + '/api/training/train-local', {
+                    method: 'POST'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    consoleEl.innerHTML += '<div>> Training started! Check server console for detailed logs.</div>';
+                    consoleEl.innerHTML += '<div>> (Note: In this demo, check the terminal where you ran "npm start")</div>';
+                    alert('✅ Training started successfully!');
+                } else {
+                    consoleEl.innerHTML += `<div style="color: red;">> Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                consoleEl.innerHTML += `<div style="color: red;">> Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
+
+
+

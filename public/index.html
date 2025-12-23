@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ketamine Therapy Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .chat-section, .upload-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .ai-message {
+            background: white;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"], textarea, select {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .file-upload {
+            border: 3px dashed #667eea;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            background: #f8f9fa;
+            border-color: #764ba2;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .documents-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .document-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .document-item button {
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+
+        .session-context {
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            padding: 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .stat-box .label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Ketamine Therapy Companion</h1>
+            <p>Your AI-powered support for ketamine-assisted therapy</p>
+            <div style="margin-top: 20px;">
+                <a href="index.html" style="display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 10px; margin: 5px; font-weight: bold;">💬 Chat Interface</a>
+                <a href="training.html" style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 10px; margin: 5px; font-weight: bold;">🧠 Model Training</a>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>⚠️ Important Disclaimer:</strong> This is not a medical device or a replacement for professional healthcare. 
+            Always consult with your licensed healthcare provider. In case of emergency, call 911 or your local emergency services.
+        </div>
+
+        <div class="main-content">
+            <!-- Chat Section -->
+            <div class="chat-section">
+                <h2 class="section-title">💬 Therapeutic Conversation</h2>
+                
+                <div class="session-context">
+                    <label for="context-select"><strong>Session Context:</strong></label>
+                    <select id="context-select">
+                        <option value="">General Support</option>
+                        <option value="Preparing for my upcoming ketamine therapy session">Pre-Session Preparation</option>
+                        <option value="Currently in a session or shortly after">During/Post-Session</option>
+                        <option value="Integration work - reflecting on past sessions">Integration & Reflection</option>
+                        <option value="Dealing with difficult emotions or experiences">Emotional Support</option>
+                    </select>
+                </div>
+
+                <div class="chat-container" id="chatContainer">
+                    <div class="message ai-message">
+                        Hello! I'm here to support you on your healing journey with ketamine-assisted therapy. 
+                        How can I help you today? Whether you're preparing for a session, processing an experience, 
+                        or have questions about the therapeutic process, I'm here to listen and provide guidance.
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <textarea id="messageInput" placeholder="Share your thoughts, questions, or feelings..." rows="3"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="useKnowledgeBase" checked style="width: auto; margin-right: 10px;">
+                        Use uploaded documents
+                    </label>
+                    <button id="sendButton" onclick="sendMessage()">Send Message</button>
+                </div>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <h2 class="section-title">📚 Knowledge Base</h2>
+                
+                <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                    <p>📤 <strong>Upload Therapy Resources</strong></p>
+                    <p style="color: #666; font-size: 0.9em;">
+                        Click to upload protocols, guidelines, or educational materials (PDF, TXT, MD, JSON, CSV)
+                    </p>
+                    <input type="file" id="fileInput" accept=".txt,.md,.json,.csv,.pdf" onchange="uploadFile()">
+                </div>
+
+                <h3 style="margin-bottom: 15px;">📁 Uploaded Documents</h3>
+                <div class="documents-list" id="documentsList">
+                    <p style="text-align: center; color: #666;">No documents uploaded yet</p>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="number" id="docCount">0</div>
+                        <div class="label">Documents</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="messageCount">0</div>
+                        <div class="label">Messages</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="sessionCount">1</div>
+                        <div class="label">Session</div>
+                    </div>
+                </div>
+
+                <button onclick="loadDocuments()" style="width: 100%; margin-top: 15px;">
+                    🔄 Refresh Documents
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let messageCount = 0;
+
+        // Load documents on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Ketamine Therapy Companion - Frontend Loaded');
+            console.log('🔗 API URL:', API_URL);
+            console.log('📚 Initializing knowledge base...\n');
+            loadDocuments();
+        });
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            const useKB = document.getElementById('useKnowledgeBase').checked;
+            const context = document.getElementById('context-select').value;
+            
+            if (!message) return;
+
+            console.log('\n🚀 ===== SENDING MESSAGE =====');
+            console.log('📝 Message:', message);
+            console.log('📚 Use Knowledge Base:', useKB);
+            console.log('🎯 Session Context:', context);
+
+            // Add user message to chat
+            addMessageToChat(message, 'user');
+            messageInput.value = '';
+            
+            // Disable send button
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+            sendButton.textContent = 'Thinking...';
+
+            try {
+                const endpoint = useKB ? '/api/therapy/chat-with-docs' : '/api/therapy/chat';
+                console.log('🔗 Endpoint:', API_URL + endpoint);
+                
+                const requestBody = {
+                    message: message,
+                    session_context: context,
+                    use_knowledge_base: useKB
+                };
+                console.log('📦 Request Body:', requestBody);
+
+                const response = await fetch(API_URL + endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                console.log('✅ Response received:', data);
+
+                if (data.success) {
+                    console.log('💬 AI Response:', data.response);
+                    
+                    // Log RAG-specific info if available
+                    if (data.knowledge_base_used) {
+                        console.log('\n📚 === RAG INFORMATION ===');
+                        console.log('📁 Documents in KB:', data.documents_count);
+                        console.log('📄 Chunks Used:', data.chunks_used);
+                        console.log('🔢 Context Tokens:', data.context_tokens);
+                        console.log('⚙️  Method:', data.method);
+                        
+                        // Show source references
+                        if (data.sources && data.sources.length > 0) {
+                            console.log('\n📍 === SOURCES REFERENCED ===');
+                            data.sources.forEach((source, idx) => {
+                                console.log(`\n   Source ${idx + 1}:`);
+                                console.log(`   📄 File: ${source.filename}`);
+                                console.log(`   📑 Chunk: ${source.chunkIndex} of ${source.totalChunks}`);
+                                console.log(`   📏 Characters: ${source.startChar}-${source.endChar}`);
+                                console.log(`   📝 Preview: "${source.preview}"`);
+                            });
+                        }
+                        console.log('========================\n');
+                    }
+                    
+                    addMessageToChat(data.response, 'ai');
+                    messageCount++;
+                    document.getElementById('messageCount').textContent = messageCount;
+                } else {
+                    console.error('❌ Error from server:', data.error);
+                    addMessageToChat('Sorry, I encountered an error: ' + data.error, 'ai');
+                }
+            } catch (error) {
+                console.error('❌ Connection Error:', error);
+                addMessageToChat('Sorry, I could not connect to the server. Please make sure it is running.', 'ai');
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send Message';
+                console.log('===== MESSAGE COMPLETE =====\n');
+            }
+        }
+
+        function addMessageToChat(message, sender) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = message;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+
+            console.log('\n📤 ===== FILE UPLOAD =====');
+            console.log('📁 File Name:', file.name);
+            console.log('📏 File Size:', (file.size / 1024).toFixed(2), 'KB');
+            console.log('📋 File Type:', file.type);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                console.log('🔄 Uploading to:', API_URL + '/api/therapy/upload');
+                
+                const response = await fetch(API_URL + '/api/therapy/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log('✅ Upload Response:', data);
+
+                if (data.success) {
+                    console.log('💾 Saved to Knowledge Base:', data.knowledge_base_file);
+                    console.log('📊 Extracted Text Length:', data.extracted_text_length, 'characters');
+                    console.log('📝 File Type:', data.type);
+                    console.log('===== UPLOAD COMPLETE =====\n');
+                    
+                    alert('✅ File uploaded successfully: ' + data.filename);
+                    loadDocuments();
+                } else {
+                    console.error('❌ Upload Failed:', data.error);
+                    alert('❌ Upload failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('❌ Upload Error:', error);
+                alert('❌ Upload failed: ' + error.message);
+            }
+
+            fileInput.value = '';
+        }
+
+        async function loadDocuments() {
+            try {
+                console.log('📚 Loading documents from knowledge base...');
+                
+                const response = await fetch(API_URL + '/api/therapy/documents');
+                const data = await response.json();
+
+                console.log('📁 Documents Response:', data);
+
+                const documentsList = document.getElementById('documentsList');
+                
+                if (data.documents && data.documents.length > 0) {
+                    console.log('✅ Found', data.documents.length, 'documents in knowledge base:');
+                    data.documents.forEach((doc, index) => {
+                        console.log(`   ${index + 1}. ${doc.filename} - ${(doc.size / 1024).toFixed(2)} KB`);
+                    });
+                    
+                    documentsList.innerHTML = data.documents.map(doc => `
+                        <div class="document-item">
+                            <div>
+                                <strong>${doc.filename}</strong><br>
+                                <small>${(doc.size / 1024).toFixed(2)} KB</small>
+                            </div>
+                            <button onclick="deleteDocument('${doc.filename}')">Delete</button>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('docCount').textContent = data.documents.length;
+                } else {
+                    console.log('📭 No documents in knowledge base');
+                    documentsList.innerHTML = '<p style="text-align: center; color: #666;">No documents uploaded yet</p>';
+                    document.getElementById('docCount').textContent = '0';
+                }
+            } catch (error) {
+                console.error('❌ Failed to load documents:', error);
+            }
+        }
+
+        async function deleteDocument(filename) {
+            if (!confirm('Delete ' + filename + '?')) return;
+
+            try {
+                const response = await fetch(API_URL + '/api/therapy/documents/' + encodeURIComponent(filename), {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    loadDocuments();
+                } else {
+                    alert('Failed to delete: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to delete: ' + error.message);
+            }
+        }
+
+        // Allow Enter key to send message (Shift+Enter for new line)
+        document.getElementById('messageInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
+
