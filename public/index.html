@@ -329,7 +329,12 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000';
+        // Dynamically set API URL based on environment
+        // In production, API is at the same host on port 3000
+        // In development, it's at localhost:3000
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : `http://${window.location.hostname}:3000`;
         let messageCount = 0;
 
         // Load documents on page load

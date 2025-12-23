@@ -9,6 +9,7 @@ A Node.js API connected to Hugging Face LLM with RAG (Retrieval-Augmented Genera
 - 💬 **Therapeutic Conversation AI** powered by Meta Llama 3.1
 - 📚 **Knowledge Base Management**
 - 🔄 **Training Center** for fine-tuning examples
+- 🖥️ **Local Model Fine-Tuning** with GPU support
 - 🚀 **Easy Deployment** on Ubuntu servers
 
 ## Quick Start (Local Development)
@@ -95,6 +96,11 @@ TestAI/
 │   ├── therapy.js           # Therapy-specific routes
 │   ├── general.js           # General chat routes
 │   └── training.js          # Training data routes
+├── scripts/
+│   ├── train.py             # Local model training (Python)
+│   ├── test_model.py        # Test fine-tuned model
+│   ├── compare_models.py    # Compare base vs fine-tuned
+│   └── README.md            # Scripts documentation
 ├── config/
 │   └── prompts.js           # System prompts
 ├── utils/
@@ -106,21 +112,37 @@ TestAI/
 ├── public/
 │   ├── index.html           # Main frontend
 │   └── training.html        # Training center UI
+├── fine-tuning/
+│   ├── prepare-training-data.js  # Training data preparation
+│   └── training-data/            # Training examples storage
+├── models/                  # Fine-tuned models (created after training)
 ├── knowledge-base/          # Uploaded documents
 ├── uploads/                 # Temporary uploads
+├── requirements.txt         # Python dependencies
 ├── .env.example             # Environment template
 ├── setup-ubuntu.sh          # Ubuntu setup script
 ├── deploy-ubuntu.sh         # Production deployment script
-└── DEPLOYMENT.md            # Deployment guide
+└── Documentation/
+    ├── DEPLOYMENT.md             # Deployment guide
+    ├── LOCAL-TRAINING-GUIDE.md   # Local training setup
+    └── FINE-TUNING-GUIDE.md      # Fine-tuning options
 ```
 
 ## Available Scripts
 
+### Node.js Scripts
 - `npm start` - Start the server
 - `npm run dev` - Start with nodemon (auto-reload)
 - `npm test` - Test the API
 - `npm run example` - Run example with files
 - `npm run prepare-training` - Prepare training data
+
+### Python Scripts (Local Training)
+- `python scripts/train.py` - Train Llama 3.1 8B locally
+- `python scripts/test_model.py` - Test your fine-tuned model
+- `python scripts/compare_models.py` - Compare base vs fine-tuned
+
+See [LOCAL-TRAINING-GUIDE.md](LOCAL-TRAINING-GUIDE.md) for setup instructions.
 
 ## Environment Variables
 
@@ -142,9 +164,32 @@ TestAI/
 
 - [Quick Start Guide](QUICK-START.md)
 - [Training Guide](TRAINING-GUIDE.md)
-- [Ubuntu Deployment](DEPLOYMENT.md)
+- [Local Training Guide](LOCAL-TRAINING-GUIDE.md) ⭐ NEW
 - [Fine-Tuning Guide](FINE-TUNING-GUIDE.md)
+- [Ubuntu Deployment](DEPLOYMENT.md)
 - [Project Structure](PROJECT-STRUCTURE.md)
+- [Scripts Documentation](scripts/README.md)
+
+## Model Training Options
+
+This project supports multiple training approaches:
+
+### 1. RAG (No Training Required) ✅
+- Upload documents via the web interface
+- Documents are used as context for responses
+- **Best for:** Up-to-date information, quick setup
+
+### 2. Local Fine-Tuning 🖥️
+- Train Llama 3.1 8B on your own GPU
+- Requires: NVIDIA GPU 16GB+ VRAM, Python, CUDA
+- **Best for:** Full control, custom deployment
+- **Guide:** [LOCAL-TRAINING-GUIDE.md](LOCAL-TRAINING-GUIDE.md)
+
+### 3. Cloud Fine-Tuning ☁️
+- Google Colab (free tier available)
+- Hugging Face AutoTrain (~$5-50)
+- **Best for:** No local GPU required
+- **Guide:** [FINE-TUNING-GUIDE.md](FINE-TUNING-GUIDE.md)
 
 ## Troubleshooting
 

@@ -442,18 +442,44 @@
                 <h2 class="section-title">🖥️ Local Training</h2>
 
                 <div class="info-box" style="background: #e8f5e9; border-color: #4caf50;">
-                    <h3 style="color: #2e7d32;">🚀 Train on your machine</h3>
-                    <p>You can train the model locally if you have Python installed. If not, this will run a simulation
-                        to demonstrate the process.</p>
+                    <h3 style="color: #2e7d32;">🚀 Train Llama 3.1 8B on your machine</h3>
+                    <p><strong>Requirements:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>NVIDIA GPU with 16GB+ VRAM (RTX 4090, V100, A4000, etc.)</li>
+                        <li>32GB+ System RAM</li>
+                        <li>Python 3.10+ with PyTorch & Transformers</li>
+                        <li>Hugging Face account & token</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Training time:</strong> 2-10 hours depending on GPU and data size</p>
+                </div>
+
+                <div class="warning-box">
+                    <h3>⚠️ Setup Required</h3>
+                    <p>Before clicking the button below, you must:</p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Install Python dependencies: <code>pip install -r requirements.txt</code></li>
+                        <li>Set your Hugging Face token: <code>export HUGGINGFACE_TOKEN=your_token</code></li>
+                        <li>Request access to Llama 3.1 on Hugging Face</li>
+                    </ol>
+                    <p style="margin-top: 10px;">📖 See <strong>LOCAL-TRAINING-GUIDE.md</strong> for complete setup instructions.</p>
                 </div>
 
                 <div class="training-status" id="trainingConsole"
                     style="background: #1e1e1e; color: #00ff00; font-family: monospace; padding: 15px; border-radius: 5px; height: 200px; overflow-y: auto; display: none;">
-                    <div>> Ready to start training...</div>
+                    <div>> Training will start in the background...</div>
+                    <div>> Check your terminal/console for detailed progress logs</div>
                 </div>
 
                 <button onclick="startLocalTraining()" style="width: 100%; margin: 10px 0; font-size: 1.2em;">🚀 Start
                     Local Training</button>
+                
+                <div style="margin-top: 15px; text-align: center;">
+                    <p style="color: #666; font-size: 0.9em;">
+                        Can't meet GPU requirements? Use 
+                        <a href="https://colab.research.google.com/" target="_blank" style="color: #667eea;">Google Colab</a> or
+                        <a href="https://huggingface.co/autotrain" target="_blank" style="color: #667eea;">Hugging Face AutoTrain</a>
+                    </p>
+                </div>
             </div>
 
             <!-- Training Guide -->
@@ -489,7 +515,12 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000';
+        // Dynamically set API URL based on environment
+        // In production, API is at the same host on port 3000
+        // In development, it's at localhost:3000
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : `http://${window.location.hostname}:3000`;
         let trainingExamples = [];
 
         // Load examples on page load
@@ -699,11 +730,23 @@
         }
 
         async function startLocalTraining() {
-            if (!confirm('Start local training? This may take a while.')) return;
+            const trainingExamples = await fetch(API_URL + '/api/training/examples')
+                .then(res => res.json())
+                .then(data => data.examples || []);
+
+            if (trainingExamples.length < 50) {
+                if (!confirm(`⚠️ Warning: You only have ${trainingExamples.length} training examples.\n\nRecommended minimum: 100 examples\n\nContinue anyway?`)) {
+                    return;
+                }
+            }
+
+            if (!confirm('Start local training of Llama 3.1 8B?\n\n⚠️ This requires:\n- NVIDIA GPU with 16GB+ VRAM\n- Python environment properly set up\n- Hugging Face token configured\n\nTraining will take 2-10 hours.\n\nHave you completed the setup in LOCAL-TRAINING-GUIDE.md?')) {
+                return;
+            }
 
             const consoleEl = document.getElementById('trainingConsole');
             consoleEl.style.display = 'block';
-            consoleEl.innerHTML += '<div>> Initializing training process...</div>';
+            consoleEl.innerHTML = '<div>> Sending training request to server...</div>';
 
             try {
                 const res = await fetch(API_URL + '/api/training/train-local', {
@@ -712,14 +755,29 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    consoleEl.innerHTML += '<div>> Training started! Check server console for detailed logs.</div>';
-                    consoleEl.innerHTML += '<div>> (Note: In this demo, check the terminal where you ran "npm start")</div>';
-                    alert('✅ Training started successfully!');
+                    consoleEl.innerHTML += '<div>> ✅ Training process started!</div>';
+                    consoleEl.innerHTML += '<div>> 📊 Check your terminal/console for detailed progress</div>';
+                    consoleEl.innerHTML += '<div>> 📝 Training logs will appear there</div>';
+                    consoleEl.innerHTML += '<div>> ⏱️  This will take 2-10 hours depending on your GPU</div>';
+                    consoleEl.innerHTML += '<div>> 💾 Model will be saved to: models/ketamine-therapy-fine-tuned/</div>';
+                    consoleEl.innerHTML += '<div class="mt-4"></div>';
+                    consoleEl.innerHTML += '<div>> To test after training: python scripts/test_model.py</div>';
+                    
+                    alert('✅ Training started! Check the terminal where you ran "npm start" for detailed logs.');
                 } else {
-                    consoleEl.innerHTML += `<div style="color: red;">> Error: ${data.error}</div>`;
+                    consoleEl.innerHTML += `<div style="color: red;">> ❌ Error: ${data.error || 'Unknown error'}</div>`;
+                    consoleEl.innerHTML += `<div style="color: yellow;">> Make sure Python dependencies are installed:</div>`;
+                    consoleEl.innerHTML += `<div style="color: yellow;">> pip install -r requirements.txt</div>`;
+                    alert('❌ Failed to start training. Check the console and your Python setup.');
                 }
             } catch (error) {
-                consoleEl.innerHTML += `<div style="color: red;">> Error: ${error.message}</div>`;
+                consoleEl.innerHTML += `<div style="color: red;">> ❌ Error: ${error.message}</div>`;
+                consoleEl.innerHTML += `<div style="color: yellow;">> Possible issues:</div>`;
+                consoleEl.innerHTML += `<div style="color: yellow;">>   1. Python not installed</div>`;
+                consoleEl.innerHTML += `<div style="color: yellow;">>   2. Missing Python packages</div>`;
+                consoleEl.innerHTML += `<div style="color: yellow;">>   3. Hugging Face token not set</div>`;
+                consoleEl.innerHTML += `<div style="color: yellow;">> See: LOCAL-TRAINING-GUIDE.md</div>`;
+                alert('❌ Error: ' + error.message);
             }
         }
     </script>
