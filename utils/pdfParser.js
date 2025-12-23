@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const { PDFParse } = require('pdf-parse');
+const pdf = require('pdf-parse');
 
 /**
  * Extract text from PDF buffer
@@ -9,15 +9,9 @@ const { PDFParse } = require('pdf-parse');
  */
 export async function extractTextFromPDF(dataBuffer) {
   try {
-    // Create parser instance with options
-    const parser = new PDFParse({
-      data: dataBuffer,
-      verbosity: 0 // Suppress console output
-    });
-    
-    // Get text content
-    const textResult = await parser.getText();
-    return textResult.text;
+    // pdf-parse is called as a function, not a constructor
+    const data = await pdf(dataBuffer);
+    return data.text;
   } catch (error) {
     throw new Error(`Failed to parse PDF: ${error.message}`);
   }

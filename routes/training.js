@@ -4,7 +4,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { upload } from '../middleware/upload.js';
 import { spawn } from 'child_process';
-import pdf from 'pdf-parse';
+import { createRequire } from 'module';
+
+// Import pdf-parse using require (CommonJS module)
+const require = createRequire(import.meta.url);
+const pdf = require('pdf-parse');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
